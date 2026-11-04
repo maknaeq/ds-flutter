@@ -1,20 +1,12 @@
-import 'package:flutter/foundation.dart';
-
 class ApiConfig {
   ApiConfig._();
 
-  static const String _overrideUrl = String.fromEnvironment('API_URL');
+  static const String _defaultUrl = 'https://localhost:8443/login';
 
-  static const int _localPort = 8000;
+  static const String _url =
+      String.fromEnvironment('API_URL', defaultValue: _defaultUrl);
 
   static const Duration timeout = Duration(seconds: 10);
 
-  static Uri get loginUri {
-    if (_overrideUrl.isNotEmpty) return Uri.parse(_overrideUrl);
-
-    final host = !kIsWeb && defaultTargetPlatform == TargetPlatform.android
-        ? '10.0.2.2'
-        : '127.0.0.1';
-    return Uri.parse('http://$host:$_localPort/login_tst_local.php');
-  }
+  static Uri get loginUri => Uri.parse(_url);
 }

@@ -75,6 +75,32 @@ void main() {
     );
   });
 
+  test('refuse la connexion quand l\'API répond en HTTP 400', () async {
+    final service = _serviceRespondingWith(
+      {'status': 400, 'message': 'Error'},
+      statusCode: 400,
+    );
+
+    expect(
+      service.login('jean@example.com', 'mauvais'),
+      throwsA(isA<AuthException>().having(
+          (e) => e.message, 'message', 'Email ou mot de passe incorrect.')),
+    );
+  });
+
+  test('signale trop de tentatives (HTTP 429)', () async {
+    final service = _serviceRespondingWith(
+      {'status': 429, 'message': 'Too many attempts'},
+      statusCode: 429,
+    );
+
+    expect(
+      service.login('jean@example.com', 'mauvais'),
+      throwsA(isA<AuthException>().having(
+          (e) => e.message, 'message', contains('Trop de tentatives'))),
+    );
+  });
+
   test('signale une réponse qui n\'est pas du JSON', () async {
     final service = _serviceRespondingWith('<b>Fatal error</b>');
 

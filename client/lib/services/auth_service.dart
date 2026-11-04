@@ -39,7 +39,12 @@ class AuthService {
           'Impossible de joindre le serveur. Vérifiez votre connexion.');
     }
 
-    if (response.statusCode != 200) {
+    if (response.statusCode == 429) {
+      throw const AuthException(
+          'Trop de tentatives échouées. Réessayez dans quelques minutes.');
+    }
+
+    if (response.statusCode != 200 && response.statusCode != 400) {
       throw AuthException('Erreur serveur (${response.statusCode}).');
     }
 
