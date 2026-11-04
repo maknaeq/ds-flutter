@@ -22,51 +22,60 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _isLoading = false; // État de chargement
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   // Méthode de connexion
-  void _login() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
 
-      String email = _emailController.text.trim();
-      String password = _passwordController.text.trim();
+    setState(() {
+      _isLoading = true;
+    });
 
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    try {
       final user = await _authService.login(email, password);
-      setState(() {
-        _isLoading = false;
-      });
+      if (!mounted) return;
 
-      if (user != null) {
-        // Connexion réussie avec informations supplémentaires
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProfileScreen(
-              email: email,
-              firstName: user['firstName'],
-              lastName: user['lastName'],
-              role: user['role'],
-            ),
-          ),
-        );
-      } else {
-        // Connexion échouée
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Erreur'),
-            content: const Text('Email ou mot de passe incorrect'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProfileScreen(user: user),
+        ),
+      );
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      _showError(e.message);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
+  }
+
+  void _showError(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Erreur'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -119,9 +128,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Validation du mot de passe
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer votre mot de passe';
-                    }
-                    if (value.length < 6) {
-                      return 'Le mot de passe doit contenir au moins 6 caractères';
                     }
                     return null;
                   },

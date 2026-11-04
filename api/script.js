@@ -11,7 +11,7 @@ document.getElementById('formConnexion').addEventListener('submit', function (e)
     formData.append('email', email);
     formData.append('password', password);
 
-    fetch('login.php', {
+    fetch('login_tst_local.php', {
         method: 'POST',
         body: formData
     })

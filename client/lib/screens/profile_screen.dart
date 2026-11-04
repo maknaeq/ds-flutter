@@ -2,19 +2,12 @@
 
 import 'package:flutter/material.dart';
 
-class ProfileScreen extends StatelessWidget {
-  final String email;
-  final String firstName;
-  final String lastName;
-  final String role;
+import '../models/user.dart';
 
-  const ProfileScreen({
-    Key? key,
-    required this.email,
-    required this.firstName,
-    required this.lastName,
-    required this.role,
-  }) : super(key: key);
+class ProfileScreen extends StatelessWidget {
+  final User user;
+
+  const ProfileScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -39,17 +32,17 @@ class ProfileScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.person),
               title: const Text('Nom'),
-              subtitle: Text('$firstName $lastName'),
+              subtitle: Text(user.fullName),
             ),
             ListTile(
               leading: const Icon(Icons.email),
               title: const Text('Email'),
-              subtitle: Text(email),
+              subtitle: Text(user.email),
             ),
             ListTile(
               leading: const Icon(Icons.security),
               title: const Text('Rôle'),
-              subtitle: Text(role),
+              subtitle: Text(user.roleLabel),
             ),
             const SizedBox(height: 24.0),
             ElevatedButton(
