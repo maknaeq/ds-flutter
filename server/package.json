@@ -7,7 +7,9 @@
   "scripts": {
     "seed": "node scripts/seed.js",
     "start": "node src/server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "certs": "node scripts/certs.js",
+    "setup": "npm run seed && npm run certs"
   },
   "engines": {
     "node": ">=20"

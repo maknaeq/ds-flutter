@@ -14,25 +14,19 @@ API REST utilisée par l'application Flutter pour la connexion des utilisateurs.
 
 ## Installation
 
-Prérequis : Node.js 20 ou plus, et [mkcert](https://github.com/FiloSottile/mkcert).
+Prérequis : Node.js 20 ou plus, et [mkcert](https://github.com/FiloSottile/mkcert) installé puis initialisé avec `mkcert -install` (instructions par système dans le [README principal](../README.md#installer-mkcert)).
 
 ```bash
 npm install
-npm run seed
+npm run setup
 ```
 
-`npm run seed` crée `data/users.json` avec les comptes de test, mots de passe hachés.
+`npm run setup` enchaîne deux scripts, utilisables aussi séparément :
 
-### Certificat HTTPS local
+- `npm run seed` crée `data/users.json` avec les comptes de test, mots de passe hachés.
+- `npm run certs` génère le certificat HTTPS de `localhost` dans `certs/` avec mkcert.
 
-```bash
-brew install mkcert
-mkcert -install
-mkdir -p certs
-mkcert -cert-file certs/localhost.pem -key-file certs/localhost-key.pem localhost 127.0.0.1 ::1
-```
-
-`mkcert -install` ajoute l'autorité de certification locale de mkcert au trousseau du système, pour que le navigateur fasse confiance au certificat.
+Ces commandes fonctionnent sur macOS, Windows et Linux.
 
 ## Lancement
 
