@@ -24,35 +24,67 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            // Affichage des informations du profil
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Nom'),
-              subtitle: Text(user.fullName),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Center(
+                  child: CircleAvatar(
+                    radius: 40,
+                    child: Text(
+                      '${user.firstName[0]}${user.lastName[0]}',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+                Text(
+                  user.fullName,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 24.0),
+                Card.outlined(
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.mail_outline),
+                        title: const Text('Email'),
+                        subtitle: Text(user.email),
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: const Icon(Icons.shield_outlined),
+                        title: const Text('Rôle'),
+                        subtitle: Text(user.roleLabel),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32.0),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Se déconnecter'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                ),
+              ],
             ),
-            ListTile(
-              leading: const Icon(Icons.email),
-              title: const Text('Email'),
-              subtitle: Text(user.email),
-            ),
-            ListTile(
-              leading: const Icon(Icons.security),
-              title: const Text('Rôle'),
-              subtitle: Text(user.roleLabel),
-            ),
-            const SizedBox(height: 24.0),
-            ElevatedButton(
-              onPressed: () {
-                // Déconnexion en retournant à l'écran de connexion
-                Navigator.pop(context);
-              },
-              child: const Text('Se déconnecter'),
-            ),
-          ],
+          ),
         ),
       ),
     );

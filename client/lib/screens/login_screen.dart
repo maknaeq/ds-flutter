@@ -21,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService(); // Instanciation d'AuthService
 
   bool _isLoading = false; // État de chargement
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -35,6 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() {
       _isLoading = true;
+      _errorMessage = null;
     });
 
     final email = _emailController.text.trim();
@@ -52,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } on AuthException catch (e) {
       if (!mounted) return;
-      _showError(e.message);
+      setState(() => _errorMessage = e.message);
     } finally {
       if (mounted) {
         setState(() {
@@ -62,85 +64,109 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _showError(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Erreur'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      body: SingleChildScrollView( // Ajout de SingleChildScrollView pour la réactivité
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey, // Assignation de la clé au formulaire
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                // Champ Email
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                    icon: Icon(Icons.mail),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Text(
+                    'Connexion',
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    // Validation de l'email
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer votre email';
-                    }
-                    // Regex simple pour valider l'email
-                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                      return 'Veuillez entrer un email valide';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16.0),
-                // Champ Mot de Passe
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Mot de passe',
-                    border: OutlineInputBorder(),
-                    icon: Icon(Icons.lock),
+                  const SizedBox(height: 4.0),
+                  Text(
+                    'Connectez-vous pour voir votre profil',
+                    style: TextStyle(color: colors.onSurfaceVariant),
                   ),
-                  obscureText: true, // Masquer le texte
-                  validator: (value) {
-                    // Validation du mot de passe
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer votre mot de passe';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24.0),
-                // Bouton de Connexion ou Indicateur de Chargement
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                  onPressed: _login,
-                  child: const Text('Se connecter'),
-                ),
-              ],
+                  const SizedBox(height: 32.0),
+                  TextFormField(
+                    controller: _emailController,
+                    enabled: !_isLoading,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.mail_outline),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Veuillez entrer votre email';
+                      }
+                      if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                        return 'Veuillez entrer un email valide';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                  TextFormField(
+                    controller: _passwordController,
+                    enabled: !_isLoading,
+                    decoration: InputDecoration(
+                      labelText: 'Mot de passe',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.lock_outline),
+                    ),
+                    obscureText: true,
+                    onFieldSubmitted: (_) => _login(),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Veuillez entrer votre mot de passe';
+                      }
+                      return null;
+                    },
+                  ),
+                  if (_errorMessage != null) ...[
+                    const SizedBox(height: 8.0),
+                    Row(
+                      children: [
+                        Icon(Icons.error_outline, size: 16, color: colors.error),
+                        const SizedBox(width: 6.0),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: TextStyle(color: colors.error),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 24.0),
+                  FilledButton(
+                    onPressed: _isLoading ? null : _login,
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                        : const Text('Se connecter'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
